@@ -8,7 +8,7 @@ module.exports = class RemindMe extends Plugin {
     !this.settings.get("reminders") && this.settings.set("reminders", "[]");
     powercord.api.commands.registerCommand({
       command: "reminders",
-      description: "Show all active reminders",
+      description: "Show all active reminders.",
       usage: "{c}",
       executor: () => {
         let result;
@@ -56,6 +56,7 @@ module.exports = class RemindMe extends Plugin {
     });
     powercord.api.commands.registerCommand({
       command: "remind",
+      aliases: ["reminder"],
       description: "Remind yourself something later.",
       usage: "{c} <duration> <message>",
       executor: (args) => {
