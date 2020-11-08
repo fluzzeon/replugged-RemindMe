@@ -7,6 +7,54 @@ module.exports = class RemindMe extends Plugin {
   startPlugin() {
     !this.settings.get("reminders") && this.settings.set("reminders", "[]");
     powercord.api.commands.registerCommand({
+      command: "reminders",
+      description: "Show all active reminders",
+      usage: "{c}",
+      executor: () => {
+        let result;
+
+        const reminders = JSON.parse(this.settings.get("reminders"));
+
+        if (!reminders.length) {
+          result = {
+            type: "rich",
+            title: "Reminders",
+            description: "There are no active reminders.",
+            footer: {
+              text: `Say ${powercord.api.commands.prefix}remind to set a reminder.`,
+            },
+          };
+        } else {
+          result = {
+            type: "rich",
+            title: "Reminders",
+            description: "Here's a list of all active reminders:",
+            fields: [
+              {
+                name: "Time*",
+                value: reminders.map((re) => re.duration).join("\n\n"),
+                inline: true,
+              },
+              {
+                name: "Message",
+                value: reminders.map((re) => re.message).join("\n\n"),
+                inline: true,
+              },
+            ],
+            footer: {
+              text:
+                "*The exact time that the reminder will be triggered, not how much time until.",
+            },
+          };
+        }
+
+        return {
+          send: false,
+          result,
+        };
+      },
+    });
+    powercord.api.commands.registerCommand({
       command: "remind",
       description: "Remind yourself something later.",
       usage: "{c} <duration> <message>",
@@ -81,6 +129,30 @@ module.exports = class RemindMe extends Plugin {
           result,
         };
       },
+      autocomplete: (args) => {
+        if (args[1] === void 0) {
+          return {
+            commands: [
+              {
+                command: "Enter the duration of your reminder...",
+                instruction: true,
+              },
+            ],
+          };
+        }
+
+        if (args[2] === void 0) {
+          return {
+            commands: [
+              {
+                command: `Enter a message for your ${args[0]} reminder...`,
+                wildcard: true,
+                instruction: true,
+              },
+            ],
+          };
+        }
+      },
     });
 
     reminderCheck = setInterval(() => {
@@ -152,6 +224,7 @@ module.exports = class RemindMe extends Plugin {
   }
 
   pluginWillUnload() {
+    powercord.api.commands.unregisterCommand("reminders");
     powercord.api.commands.unregisterCommand("remind");
     clearInterval(reminderCheck);
   }
