@@ -13,120 +13,119 @@ module.exports = class RemindMe extends Plugin {
       render: Settings,
     });
     powercord.api.commands.registerCommand({
-      command: "reminders",
-      description: "Show all active reminders.",
-      usage: "{c}",
-      executor: () => {
-        let result;
-
-        const reminders = JSON.parse(this.settings.get("reminders"));
-
-        if (!reminders.length) {
-          result = {
-            type: "rich",
-            title: "Reminders",
-            description: "There are no active reminders.",
-            footer: {
-              text: `Say ${powercord.api.commands.prefix}remind to set a reminder.`,
-            },
-          };
-        } else {
-          result = {
-            type: "rich",
-            title: "Reminders",
-            description: "Here's a list of all active reminders:",
-            fields: [
-              {
-                name: "Time*",
-                value: reminders.map((re) => re.duration).join("\n\n"),
-                inline: true,
-              },
-              {
-                name: "Message",
-                value: reminders.map((re) => re.message).join("\n\n"),
-                inline: true,
-              },
-            ],
-            footer: {
-              text:
-                "*The exact time that the reminder will be triggered, not how much time until.",
-            },
-          };
-        }
-
-        return {
-          send: false,
-          result,
-        };
-      },
-    });
-    powercord.api.commands.registerCommand({
       command: "remind",
       aliases: ["reminder"],
       description: "Remind yourself something later.",
-      usage: "{c} <duration> <message>",
+      usage: '{c} [ args ]',
       executor: (args) => {
         let result;
 
-        if (args.length < 2) {
+        if (args.length < 1) {
           result = {
             type: "rich",
             title: "Remind Command",
-            description: "Please input a `<duration>` and a `<message>`.",
+            description: "Please select which option you would like!",
             footer: {
               text: `Say ${powercord.api.commands.prefix}help remind to see this command's usage.`,
             },
           };
         } else {
           try {
-            let duration = args[0];
-            const today = new Date();
-            switch (duration.replace(/[0-9]/g, "")) {
-              case "s":
-                if (today.getSeconds() + parseInt(duration) > 59) {
-                  duration = today.getSeconds() + parseInt(duration) + "s+";
-                } else {
-                  duration = today.getSeconds() + parseInt(duration) + "s";
+            switch (args[0]) {
+              case 'add':
+                let duration = args[1];
+                let message = args.slice(2).join(' ')
+                if (!duration) return {
+                  send: false,
+                  result: 'Enter the duration of your reminder...'
                 }
-                break;
-              case "m":
-                if (today.getMinutes() + parseInt(duration) > 59) {
-                  duration = today.getMinutes() + parseInt(duration) + "m+";
-                } else {
-                  duration = today.getMinutes() + parseInt(duration) + "m";
+                if (!message) return {
+                  send: false,
+                  result: `Enter a message for your ${duration} reminder...`
                 }
-                break;
-              case "h":
-                if (today.getHours() + parseInt(duration) > 23) {
-                  duration = today.getHours() + parseInt(duration) + "h+";
-                } else {
-                  duration = today.getHours() + parseInt(duration) + "h";
+                const today = new Date();
+                switch (duration.replace(/[0-9]/g, "")) {
+                  case "s":
+                    if (today.getSeconds() + parseInt(duration) > 59) {
+                      duration = today.getSeconds() + parseInt(duration) + "s+";
+                    } else {
+                      duration = today.getSeconds() + parseInt(duration) + "s";
+                    }
+                    break;
+                  case "m":
+                    if (today.getMinutes() + parseInt(duration) > 59) {
+                      duration = today.getMinutes() + parseInt(duration) + "m+";
+                    } else {
+                      duration = today.getMinutes() + parseInt(duration) + "m";
+                    }
+                    break;
+                  case "h":
+                    if (today.getHours() + parseInt(duration) > 23) {
+                      duration = today.getHours() + parseInt(duration) + "h+";
+                    } else {
+                      duration = today.getHours() + parseInt(duration) + "h";
+                    }
+                    break;
                 }
-                break;
-            }
+                const comma = this.settings.get("reminders").length > 2 ? ", " : "";
+                this.settings.set("reminders", "[" + this.settings.get("reminders").slice(1, this.settings.get("reminders").length - 1) + comma + JSON.stringify({ message, duration }) + "]");
+                result = {
+                  type: "rich",
+                  title: "Reminder set!",
+                  description: `I will remind you "${message}" in ${args[1]}.`,
+                };
+                return {
+                  send: false,
+                  result,
+                };
+                break
+              case 'list':
+                const reminders = JSON.parse(this.settings.get("reminders"));
 
-            const message = args.slice(1).join(" ");
-            const comma = this.settings.get("reminders").length > 2 ? ", " : "";
-            this.settings.set(
-              "reminders",
-              "[" +
-                this.settings
-                  .get("reminders")
-                  .slice(1, this.settings.get("reminders").length - 1) +
-                comma +
-                JSON.stringify({ message, duration }) +
-                "]"
-            );
-            result = {
-              type: "rich",
-              title: "Reminder set!",
-              description: `I will remind you "${message}" in ${args[0]}.`,
-            };
+                if (!reminders.length) {
+                  result = {
+                    type: "rich",
+                    title: "Reminders",
+                    description: "There are no active reminders.",
+                    footer: {
+                      text: `Say ${powercord.api.commands.prefix}remind to set a reminder.`,
+                    },
+                  };
+                } else {
+                  result = {
+                    type: "rich",
+                    title: "Reminders",
+                    description: "Here's a list of all active reminders:",
+                    fields: [
+                      {
+                        name: "Time*",
+                        value: reminders.map((re) => re.duration).join("\n\n"),
+                        inline: true,
+                      },
+                      {
+                        name: "Message",
+                        value: reminders.map((re) => re.message).join("\n\n"),
+                        inline: true,
+                      },
+                    ],
+                    footer: {
+                      text:
+                        "*The exact time that the reminder will be triggered, not how much time until.",
+                    },
+                  };
+                }
+
+                return {
+                  send: false,
+                  result,
+                };
+                break
+            }
           } catch (e) {
             result = {
               type: "rich",
-              title: "Reminder set failed!",
-              description: `I failed to set your reminder! Try again later.\n\`\`\`js\n${e}\`\`\``,
+              title: "Error!",
+              description: `An error has occurred!  Try again later.\n\`\`\`js\n${e}\`\`\``,
             };
           }
         }
@@ -137,29 +136,23 @@ module.exports = class RemindMe extends Plugin {
         };
       },
       autocomplete: (args) => {
-        if (args[1] === void 0) {
-          return {
-            commands: [
-              {
-                command: "Enter the duration of your reminder...",
-                instruction: true,
-              },
-            ],
-          };
+        if (args.length !== 1) {
+          return false;
         }
-
-        if (args[2] === void 0) {
-          return {
-            commands: [
-              {
-                command: `Enter a message for your ${args[0]} reminder...`,
-                wildcard: true,
-                instruction: true,
-              },
-            ],
-          };
+        let options = {
+          add: 'Adds a Reminder',
+          list: 'Show all active reminders',
         }
-      },
+        return {
+          commands: Object.keys(options)
+            .filter((option) => option.includes(args[0].toLowerCase()))
+            .map((option) => ({
+              command: option,
+              description: options[option],
+            })),
+          header: 'Quick Status',
+        };
+      }
     });
 
     reminderCheck = setInterval(() => {
@@ -264,7 +257,6 @@ module.exports = class RemindMe extends Plugin {
 
   pluginWillUnload() {
     powercord.api.settings.unregisterSettings("remind-me");
-    powercord.api.commands.unregisterCommand("reminders");
     powercord.api.commands.unregisterCommand("remind");
     clearInterval(reminderCheck);
   }
