@@ -7,8 +7,8 @@ const indicators = {
   "h": ["getHours", "setHours"],
   "d": ["getHours", "setHours", 24],
   "w": ["getHours", "setHours", 24 * 7],
-  "M": ["getMonth", "setMonth"],
-  "y": ["getFullYear", "setFullYear"]
+  "M": ["getHours", "setHours", 24 * 28],
+  "y": ["getHours", "setHours", 24 * 336]
 };
 
 let reminderCheck;
@@ -24,7 +24,7 @@ module.exports = class RemindMe extends Plugin {
     powercord.api.commands.registerCommand({
       command: "remind",
       aliases: ["reminder"],
-      description: "Remind yourself something later.",
+      description: "Remind yourself about something later.",
       usage: '{c} [time] [message]',
       executor: this.run.bind(this),
       autocomplete: this.autocomplete.bind(this)
@@ -155,7 +155,7 @@ module.exports = class RemindMe extends Plugin {
       return {
         type: "rich",
         title: "Reminder removed!",
-        description: `Reminder with message "${reminder.message}" was removed!`
+        description: `Reminder "${reminder.message}" was removed!`
       }
   }
 
@@ -224,7 +224,7 @@ module.exports = class RemindMe extends Plugin {
         description: "Here's a list of all active reminders:",
         fields: [
           {
-            name: "Time*",
+            name: "Time",
             value: reminders.map(re => this.until(now, re.duration)).join("\n\n"),
             inline: true
           },
@@ -234,9 +234,6 @@ module.exports = class RemindMe extends Plugin {
             inline: true
           }
         ],
-        footer: {
-          text: "*An approximate time until you'll get reminded"
-        }
       } : {
         type: "rich",
         title: "Reminders",
