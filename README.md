@@ -1,6 +1,8 @@
 # remind-me
 A Powercord plugin that allows you to set a reminder using the `remind <duration> <message>` command
 
+![image](https://user-images.githubusercontent.com/72281779/169717127-b8bac70f-a9e6-4c38-96c0-0cac0a2ea24e.jpg)
+
 
 ## Installation
 To install this plugin go to your plugins directory and clone it with the command below.
