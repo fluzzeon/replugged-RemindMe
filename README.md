@@ -13,4 +13,3 @@ git clone https://github.com/Killerjet101/remind-me.git
 
 ## To-Do
 - [ ] Repeat reminders for however many times you want at a set time
-- [ ] Customizable snooze

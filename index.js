@@ -1,6 +1,6 @@
 const { Plugin } = require("powercord/entities");
 
-const Settings = require("./Settings.jsx");
+const Settings = require("./components/Settings.jsx");
 const indicators = {
   "s": ["getSeconds", "setSeconds"],
   "m": ["getMinutes", "setMinutes"],
@@ -33,6 +33,7 @@ module.exports = class RemindMe extends Plugin {
     reminderCheck = setInterval(() => {
       try {
         const reminders = this.get();
+        let snoozeDuration = this.settings.get("snooze_duration", 5);
 
         const Remind = reminder => {
           powercord.api.notices.sendToast("remind-me", {
@@ -47,13 +48,13 @@ module.exports = class RemindMe extends Plugin {
                 look: "outlined"
               },
               {
-                text: "Snooze (5m)",
+                text: `Snooze (${snoozeDuration}m)`,
                 color: "blue",
                 size: "medium",
                 look: "outlined",
                 onClick: () => {
                   let time = new Date();
-                  time.setMinutes(time.getMinutes() + 5)
+                  time.setMinutes(time.getMinutes() + snoozeDuration)
                   this.apply(reminder.message, time)
                 }
               }

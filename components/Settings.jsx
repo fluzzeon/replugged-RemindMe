@@ -1,5 +1,5 @@
 const { React } = require("powercord/webpack");
-const { SwitchItem, SelectInput } = require("powercord/components/settings");
+const { SwitchItem, SelectInput, SliderInput } = require("powercord/components/settings");
 
 module.exports = class Settings extends React.Component {
   render() {
@@ -41,6 +41,18 @@ module.exports = class Settings extends React.Component {
             Reminder Sound
           </SelectInput>
         )}
+        <SliderInput
+          stickToMarkers
+          minValue={ 1 }
+          maxValue={ 60 }
+          initialValue={ getSetting("snooze_duration", 5) }
+          markers={[1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60]}
+          defaultValue={ getSetting("snooze_duration", 5) }
+          onValueChange={ v => updateSetting("snooze_duration", v)}
+          note="Default duration: 5m"
+        >
+          Customize snooze duration
+        </SliderInput>
       </div>
     );
   }
