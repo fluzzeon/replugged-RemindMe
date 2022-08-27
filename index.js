@@ -133,7 +133,8 @@ module.exports = class RemindMe extends Plugin {
   }
 
   get() {
-    return JSON.parse(this.settings.get("reminders"));
+    const set = this.settings.get("reminders")
+    return set ? JSON.parse(set) : false;
   }
 
   apply(message, duration) {
